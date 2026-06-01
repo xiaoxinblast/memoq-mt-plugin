@@ -1,0 +1,11 @@
+MultiSupplierMTPlugin/bin/
+MultiSupplierMTPlugin/obj/
+TestClient/bin/
+TestClient/obj/
+DllGenerator/bin/
+DllGenerator/obj/
+MemoQ.PreviewInterfaces/bin/
+MemoQ.PreviewInterfaces/obj/
+packages/
+release/
+.vs
