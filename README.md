@@ -1,10 +1,28 @@
 # memoQ 多供应商机器翻译插件
 
-此项目基于 [Multi-Supplier-MT-Plugin](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin) 开源项目进行的修改和改进。
+> **声明**：此项目是 [JuchiaLu/Multi-Supplier-MT-Plugin](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin) 的 fork，在原作者 [JuchiaLu](https://github.com/JuchiaLu) 的工作基础上进行修改和改进。原始项目采用 [MIT License](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin/blob/main/LICENSE)。
+
+## 上游项目信息
+
+| 项目 | 详情 |
+|---|---|
+| **原作者** | [JuchiaLu](https://github.com/JuchiaLu) |
+| **原始仓库** | [JuchiaLu/Multi-Supplier-MT-Plugin](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin) |
+| **上游版本** | v1.4.1 |
+| **许可证** | [MIT License](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/LICENSE) |
+| **Star** | ⭐ 22+ |
+
+## 本 Fork 改动
+
+在原始项目基础上，本分支进行了以下改进：
+
+- **修复**：View 视图场景下上下文发送失效问题
+- **改进**：上下文标签加入序号（`[上文1 原文]` `[上文1 译文]` 等），更清晰地区分多个上下文来源
+- **重构**：改进日志排版可读性
 
 ## 项目概述
 
-memoQ 多供应商机器翻译插件（Multi-Supplier-MT-Plugin），为 CAT 工具 [memoQ](https://www.memoq.com/) 提供接入国内外数十家 MT/NMT/LLM 翻译服务商的能力。基于 memoQ 官方 MT SDK 开发，支持传统 NMT 和 OpenAI 兼容的大语言模型。
+为 CAT 工具 [memoQ](https://www.memoq.com/) 提供接入国内外数十家 MT/NMT/LLM 翻译服务商的能力。基于 memoQ 官方 MT SDK 开发，支持传统 NMT 和 OpenAI 兼容的大语言模型。
 
 ## 主要功能
 
@@ -40,8 +58,10 @@ msbuild MultiSupplierMTPlugin/MultiSupplierMTPlugin.csproj /p:Configuration=Rele
 
 ## 许可证
 
-本项目继承了原始项目的开源许可证。
+本项目继承上游 [MIT License](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/LICENSE)。
+
+> Copyright (c) 2023 JuchiaLu
 
 ## 致谢
 
-感谢原始项目 [JuchiaLu/Multi-Supplier-MT-Plugin](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin) 的作者和贡献者。
+感谢原作者 [JuchiaLu](https://github.com/JuchiaLu) 开发和维护 [Multi-Supplier-MT-Plugin](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin)，为 memoQ 用户提供了一个功能丰富的多供应商机器翻译解决方案。
