@@ -265,10 +265,14 @@ namespace MultiSupplierMTPlugin
                 texts, plainTexts, srcLang, tgtLang, tmSources, tmTargets, metaData
                 );
 
-            LoggingHelper.Verbose($"{localizedName} prompt prepared. Provider={UniqueName}, Model={g.Model}, BatchTranslate={g.EnableBathTranslate}, SegmentCount={texts.Count}, SourceLang={srcLang}, TargetLang={tgtLang}, SystemPromptChars={systemPrompt?.Length ?? 0}, UserPromptChars={userPrompt?.Length ?? 0}, PromptTemplateId={(string.IsNullOrEmpty(g.PromptTemplateId) ? "<inline>" : g.PromptTemplateId)}");
+            LoggingHelper.Verbose($"Prompt prepared | Model={g.Model} · Sys={systemPrompt?.Length ?? 0}c · Usr={userPrompt?.Length ?? 0}c · Template={(string.IsNullOrEmpty(g.PromptTemplateId) ? "inline" : g.PromptTemplateId)}");
 
             // 5.日志记录最终解析后的提示词
-            LoggingHelper.Info($"{localizedName} Request\r\n[System Prompt: ]\r\n{systemPrompt}\r\n[User Prompt: ]\r\n{userPrompt}");
+            LoggingHelper.Info("-- System Prompt --");
+            LoggingHelper.Multiline(systemPrompt);
+            LoggingHelper.Info("-- User Prompt --");
+            LoggingHelper.Multiline(userPrompt);
+            LoggingHelper.Info("-- End Prompt --");
 
             // 子类实现
             var content = await TranslateAsync(g, s, systemPrompt, userPrompt, cToken);
@@ -278,7 +282,7 @@ namespace MultiSupplierMTPlugin
                 ? BathTranslateHelper.Deserialize(g.BathTranslateSchema, texts.Count, content)
                 : new List<string> { content };
 
-            LoggingHelper.Verbose($"{localizedName} translation content parsed. Provider={UniqueName}, BatchTranslate={g.EnableBathTranslate}, ExpectedCount={texts.Count}, ReturnedCount={result?.Count ?? 0}, ContentChars={content?.Length ?? 0}");
+            LoggingHelper.Verbose($"Translation parsed | Batch={g.EnableBathTranslate} · Expected={texts.Count} · Returned={result?.Count ?? 0} · Chars={content?.Length ?? 0}");
 
             // 15.返回最终结果
             return result;

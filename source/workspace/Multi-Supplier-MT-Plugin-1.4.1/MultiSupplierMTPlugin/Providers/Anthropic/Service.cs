@@ -298,14 +298,13 @@ namespace MultiSupplierMTPlugin.Providers.Anthropic
                 throw new HttpRequestException("Anthropic response does not contain a text content block.");
 
             // 12.日志记录响应结果
-            LoggingHelper.Info($"{localizedName} Response\r\n{content}");
+            LoggingHelper.Info("-- Response --");
+            LoggingHelper.Multiline(content);
 
             // 13.日志记录 token 使用情况
-            LoggingHelper.Info($"{localizedName} Tokens Usage\r\n" +
-                $"InputTokens: {anthropicResponse?.Usage?.InputTokens}" +
-                $"(WriteToCache: {anthropicResponse?.Usage?.CacheCreationInputTokens}" +
-                $", ReadFromCache: {anthropicResponse?.Usage?.CacheReadInputTokens})" +
-                $", OutputTokens: {anthropicResponse?.Usage?.OutputTokens}");
+            LoggingHelper.Info($"Tokens | In={anthropicResponse?.Usage?.InputTokens}" +
+                $"(cacheW={anthropicResponse?.Usage?.CacheCreationInputTokens},cacheR={anthropicResponse?.Usage?.CacheReadInputTokens})" +
+                $" | Out={anthropicResponse?.Usage?.OutputTokens}");
 
             return content;
         }

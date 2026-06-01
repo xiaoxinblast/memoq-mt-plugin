@@ -464,15 +464,14 @@ namespace MultiSupplierMTPlugin.Providers.OpenAI
             string content = choice.Message.Content;
 
             // 12.日志记录响应结果
-            LoggingHelper.Info($"{localizedName} Response\r\n{content}");
+            LoggingHelper.Info("-- Response --");
+            LoggingHelper.Multiline(content);
 
             // 13.日志记录 token 使用情况
-            LoggingHelper.Info($"{localizedName} Tokens Usage\r\n" +
-                $"InputTokens: {chatCompletionResponse?.Usage?.PromptTokens}" +
-                $"(WriteToCache: {chatCompletionResponse?.Usage?.PromptTokens}" +
-                $", ReadFromCache: {chatCompletionResponse?.Usage?.PromptTokensDetails?.CachedTokens})" +
-                $", OutputTokens: {chatCompletionResponse?.Usage?.CompletionTokens}" +
-                $", ReasoningTokens: {chatCompletionResponse?.Usage?.CompletionTokensDetails?.ReasoningTokens}");
+            LoggingHelper.Info($"Tokens | In={chatCompletionResponse?.Usage?.PromptTokens}" +
+                $"(cacheW={chatCompletionResponse?.Usage?.PromptTokens},cacheR={chatCompletionResponse?.Usage?.PromptTokensDetails?.CachedTokens})" +
+                $" · Out={chatCompletionResponse?.Usage?.CompletionTokens}" +
+                $" · Reasoning={chatCompletionResponse?.Usage?.CompletionTokensDetails?.ReasoningTokens}");
 
             return content;
         }

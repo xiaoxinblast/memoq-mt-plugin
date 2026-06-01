@@ -91,6 +91,10 @@ namespace MultiSupplierMTPlugin
 
         public TranslationResult[] TranslateCorrectSegment(Segment[] srcSegms, Segment[] tmSrcSegms, Segment[] tmTgtSegms, MTRequestMetadata metaData)
         {
+            using (LoggingHelper.BeginRequest())
+            {
+                LoggingHelper.Info($"TranslateCorrectSegment | Segments={srcSegms?.Length ?? 0} · {_srcLangCode}→{_trgLangCode} · Provider={_providerService.UniqueName}");
+
             var stopwatch = Stopwatch.StartNew();
 
             //memoQ 10.0 之前的版本不支持这两个参数
@@ -127,9 +131,11 @@ namespace MultiSupplierMTPlugin
             }
 
             stopwatch.Stop();
-            LoggingHelper.Verbose($"Session request finished. Provider={_providerService.UniqueName}, SegmentCount={srcSegms.Length}, UncachedCount={untransSrcTexts.Count}, ElapsedMs={stopwatch.ElapsedMilliseconds}");
+            LoggingHelper.Info($"Session finished | Elapsed={stopwatch.ElapsedMilliseconds}ms | Total={srcSegms.Length} | Uncached={untransSrcTexts.Count}");
+            LoggingHelper.Separator();
 
             return results;
+            } // End using LoggingHelper.BeginRequest()
         }
 
         #endregion
