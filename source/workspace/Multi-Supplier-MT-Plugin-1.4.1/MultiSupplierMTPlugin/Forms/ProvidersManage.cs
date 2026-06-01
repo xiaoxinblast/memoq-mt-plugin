@@ -39,9 +39,18 @@ namespace MultiSupplierMTPlugin.Forms
         {
             base.OnLoad(e);
 
+            ApplyTheme();
+
             Localized();
 
             LoadOptions();
+        }
+
+        private void ApplyTheme()
+        {
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
+            ThemeHelper.MakeResizable(this, 700, 450);
         }
 
         private void Localized()

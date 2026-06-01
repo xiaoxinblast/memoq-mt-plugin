@@ -87,9 +87,6 @@
 	  <Compile Update="Forms\CheckFailedDetails.cs">
 	    <SubType>Form</SubType>
 	  </Compile>
-	  <Compile Update="Forms\RequestTypeLimit.cs">
-	    <SubType>Form</SubType>
-	  </Compile>
 	  <Compile Update="ProvidersCommon\Forms\LLM\BathTranslate.cs">
 	    <SubType>Form</SubType>
 	  </Compile>
@@ -110,12 +107,6 @@
 	  <Compile Update="Forms\ProvidersManage.cs" />
 	  <Compile Update="Forms\FreeOpenSourceTip.cs" />
 	  <Compile Update="ProvidersCommon\Forms\LLM\PromptPlaceholders.cs">
-	    <SubType>Form</SubType>
-	  </Compile>
-	  <Compile Update="Forms\CustomDisplayName.cs" />
-	  <Compile Update="Forms\TranslateCache.cs" />
-	  <Compile Update="Forms\CustomLimit.cs" />
-	  <Compile Update="Providers\Papago\OptionsForm.cs">
 	    <SubType>Form</SubType>
 	  </Compile>
 	  <Compile Update="ProvidersCommon\Forms\LLM\OptionsForm.cs" />

@@ -40,6 +40,9 @@ namespace MultiSupplierMTPlugin.Providers.Yandex
 
             Localized();
 
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
+
             LoadOptions();
 
             BindOptionsChangedEvent();

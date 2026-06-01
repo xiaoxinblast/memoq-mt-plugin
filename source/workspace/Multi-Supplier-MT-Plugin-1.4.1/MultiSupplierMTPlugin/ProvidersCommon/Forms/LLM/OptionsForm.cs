@@ -66,6 +66,9 @@ namespace MultiSupplierMTPlugin.ProvidersCommon.Forms.LLM
         {
             base.OnLoad(e);
 
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
+
             Localized();
 
             LoadOptions();

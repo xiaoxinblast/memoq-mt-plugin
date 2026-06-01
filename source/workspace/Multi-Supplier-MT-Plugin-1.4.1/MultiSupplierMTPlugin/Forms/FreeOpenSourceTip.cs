@@ -1,4 +1,5 @@
-﻿using MultiSupplierMTPlugin.Localized;
+﻿using MultiSupplierMTPlugin.Helpers;
+using MultiSupplierMTPlugin.Localized;
 using System;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -25,9 +26,20 @@ namespace MultiSupplierMTPlugin.Forms
         {
             base.OnLoad(e);
 
+            ApplyTheme();
+
             Localized();
 
             LoadOptions();
+        }
+
+        private void ApplyTheme()
+        {
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
+            ThemeHelper.ApplyFlatButtonStyle(buttonGotIt, isPrimary: true);
+            ThemeHelper.ApplyFlatButtonStyle(buttonNeverShow, isPrimary: false);
+            ThemeHelper.MakeResizable(this, 400, 175);
         }
 
         private void Localized()

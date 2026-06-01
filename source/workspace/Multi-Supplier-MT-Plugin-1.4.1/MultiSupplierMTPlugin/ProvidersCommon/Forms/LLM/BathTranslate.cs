@@ -1,3 +1,4 @@
+using MultiSupplierMTPlugin.Helpers;
 ﻿using MultiSupplierMTPlugin.Localized;
 using MultiSupplierMTPlugin.ProvidersCommon.Options.LLM;
 using System;
@@ -30,6 +31,9 @@ namespace MultiSupplierMTPlugin.ProvidersCommon.Forms.LLM
             base.OnLoad(e);
 
             Localized();
+
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
 
             LoadOptions();
         }

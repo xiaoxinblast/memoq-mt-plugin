@@ -1,3 +1,4 @@
+using MultiSupplierMTPlugin.Helpers;
 ﻿using MultiSupplierMTPlugin.Forms;
 using MultiSupplierMTPlugin.Localized;
 using System;
@@ -26,11 +27,24 @@ namespace MultiSupplierMTPlugin.ProviderdsCommon.Forms
         {
             InitializeComponent();
 
+            ApplyTheme();
+
             linkLabelCheck.Text = LLH.G(LLK.LinkLabelCheck);
 
             buttonOK.Text = LLH.G(LLKC.ButtonOK);
             buttonCancel.Text = LLH.G(LLKC.ButtonCancel);
             buttonHelp.Text = LLH.G(LLKC.ButtonHelp);
+        }
+
+        private void ApplyTheme()
+        {
+            ThemeHelper.ApplyFlatButtonStyle(buttonOK, isPrimary: true);
+            ThemeHelper.ApplyFlatButtonStyle(buttonCancel, isPrimary: false);
+            ThemeHelper.ApplyFlatButtonStyle(buttonHelp, isPrimary: false);
+
+            labelSuccess.ForeColor = ThemeHelper.Success;
+            linkLabelFailed.LinkColor = ThemeHelper.ErrorColor;
+            linkLabelCheck.LinkColor = ThemeHelper.InfoBlue;
         }
 
 

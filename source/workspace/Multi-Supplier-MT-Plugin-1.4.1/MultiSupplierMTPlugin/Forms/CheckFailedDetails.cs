@@ -1,4 +1,5 @@
-﻿using MultiSupplierMTPlugin.Localized;
+﻿using MultiSupplierMTPlugin.Helpers;
+using MultiSupplierMTPlugin.Localized;
 using System;
 using LLH = MultiSupplierMTPlugin.Localized.LocalizedHelper;
 using LLK = MultiSupplierMTPlugin.Forms.CheckFailedDetailsLocalizedKey;
@@ -21,9 +22,19 @@ namespace MultiSupplierMTPlugin.Forms
         {
             base.OnLoad(e);
 
+            ApplyTheme();
+
             Localized();
 
             LoadOptions();
+        }
+
+        private void ApplyTheme()
+        {
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
+            ThemeHelper.ApplyFlatButtonStyle(buttonOK, isPrimary: true);
+            ThemeHelper.MakeResizable(this, 400, 200);
         }
 
         private void Localized()

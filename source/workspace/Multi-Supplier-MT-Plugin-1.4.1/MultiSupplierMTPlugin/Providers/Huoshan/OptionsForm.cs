@@ -1,3 +1,4 @@
+using MultiSupplierMTPlugin.Helpers;
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -37,6 +38,9 @@ namespace MultiSupplierMTPlugin.Providers.Huoshan
             base.OnLoad(e);
 
             Localized();
+
+            ThemeHelper.ApplyFormTheme(this);
+            ThemeHelper.ApplyRoundedCorners(this, 8);
 
             LoadOptions();
 
