@@ -38,6 +38,10 @@ namespace MultiSupplierMTPlugin.Helpers
         // 记录文档的原始名字
         private readonly ConcurrentDictionary<string, string> _docNameDic = new ConcurrentDictionary<string, string>();
 
+        // 记录语言对到文档键的映射，用于 View 场景下 metaData.DocumentID（View GUID）与
+        // Preview SDK 的 SourceDocument.DocumentGuid（原始文档 GUID）不一致时的回退查找
+        private readonly ConcurrentDictionary<string, string> _langPairToDocKey = new ConcurrentDictionary<string, string>();
+
         // 记录句段索引与 preview part id 的映射，用于按需主动刷新当前句段内容
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<int, string>> _previewPartIdDic = new ConcurrentDictionary<string, ConcurrentDictionary<int, string>>();
 
@@ -90,7 +94,7 @@ namespace MultiSupplierMTPlugin.Helpers
 
         public CurrentIndex GetCurrentIndex(string prjGuid, string docGuid, string srcLang, string tgtLang)
         {
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_currentIndexDic.TryGetValue(key, out var currentIndex))
                 throw new Exception("Wait for the document to reload and reactivate the current segment, or document load fails, reopen the document.");
@@ -100,7 +104,7 @@ namespace MultiSupplierMTPlugin.Helpers
 
         public void ResetCurrentIndex(string prjGuid, string docGuid, string srcLang, string tgtLang)
         {
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_currentIndexDic.ContainsKey(key))
                 throw new Exception("document load fails, reopen the document.");
@@ -118,7 +122,7 @@ namespace MultiSupplierMTPlugin.Helpers
         {
             CheckConnect();
 
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_docDic.TryGetValue(key, out var doc) || !doc.TryGetValue(segmIndex, out Content content))
                 throw new Exception("document load fails, reopen the document.");
@@ -131,7 +135,7 @@ namespace MultiSupplierMTPlugin.Helpers
         {
             CheckConnect();
 
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_docDic.TryGetValue(key, out var doc) || !doc.TryGetValue(segmIndex, out Content content))
                 throw new Exception("document load fails, reopen the document.");
@@ -179,7 +183,7 @@ namespace MultiSupplierMTPlugin.Helpers
         {
             CheckConnect();
 
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_docNameDic.TryGetValue(key, out var name))
                 throw new Exception("document load fails, reopen the document.");
@@ -191,7 +195,7 @@ namespace MultiSupplierMTPlugin.Helpers
         {
             CheckConnect();
 
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_docDic.TryGetValue(key, out var doc) || !_lastIndexDic.TryGetValue(key, out var lastIndex))
                 throw new Exception("document load fails, reopen the document.");
@@ -214,7 +218,7 @@ namespace MultiSupplierMTPlugin.Helpers
         {
             CheckConnect();
 
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             SetContext(key, segmIndex, srcContent, tgtContent);
         }
@@ -230,7 +234,7 @@ namespace MultiSupplierMTPlugin.Helpers
         private string GetContext(string prjGuid, string docGuid, string srcLang, string tgtLang,
            int segmIndex, int maxSegm, int maxChar, bool includeSrc, bool includeTgt, bool isAbove, Func<string, string, string> targetNormalizer)
         {
-            string key = GetKey(prjGuid, docGuid, srcLang, tgtLang);
+            string key = ResolveKey(docGuid, srcLang, tgtLang);
 
             if (!_docDic.TryGetValue(key, out var doc) || !_lastIndexDic.TryGetValue(key, out var lastIndex))
                 throw new Exception("document load fails, reopen the document.");
@@ -313,6 +317,14 @@ namespace MultiSupplierMTPlugin.Helpers
             {
                 doc = new ConcurrentDictionary<int, Content>();
                 _docDic[key] = doc;
+
+                // 注册语言对 → 文档键映射，用于 View 场景下 GUID 不匹配时的回退
+                var parts = key.Split('|');
+                if (parts.Length >= 3)
+                {
+                    var langKey = $"*|{parts[1]}|{parts[2]}";
+                    _langPairToDocKey[langKey] = key;
+                }
             }
             doc[segmIndex] = new Content(srcContent, tgtContent, properties);
 
@@ -462,10 +474,53 @@ namespace MultiSupplierMTPlugin.Helpers
             return GetKey(prjGuid, docGuid, srcLang, tgtLang);
         }
 
-        private string GetKey(string projectGuid, string docGuid, string srcLang, string tgtLang)
+        private static string GetKey(string projectGuid, string docGuid, string srcLang, string tgtLang)
         {
             // 暂时不使用 project guid，因为只有 MT SDK 中能获取到，Preview SDK 中获取不到。
             return $"{docGuid}|{srcLang}|{tgtLang}";
+        }
+
+        /// <summary>
+        /// 解析文档查找键。当 View 场景下 metaData.DocumentID（View GUID）与
+        /// Preview SDK 回调中的 SourceDocument.DocumentGuid（原始文档 GUID）不一致时，
+        /// 通过语言对反向查找回退到正确的键。
+        /// </summary>
+        private string ResolveKey(string docGuid, string srcLang, string tgtLang)
+        {
+            string key = GetKey(null, docGuid, srcLang, tgtLang);
+
+            // 1. 精确匹配（正常文档）
+            if (_docDic.ContainsKey(key) || _currentIndexDic.ContainsKey(key))
+                return key;
+
+            // 2. View 回退：通过语言对查找（大多数用户只打开一个文档/View）
+            var langKey = $"*|{srcLang}|{tgtLang}";
+            if (_langPairToDocKey.TryGetValue(langKey, out var resolvedKey))
+            {
+                LoggingHelper.Verbose($"View document ID resolved. RequestedKey={key}, ResolvedKey={resolvedKey}");
+                return resolvedKey;
+            }
+
+            // 3. 遍历查找匹配语言对的唯一文档
+            var langSuffix = $"|{srcLang}|{tgtLang}";
+            var candidates = new List<string>();
+            foreach (var kvp in _docDic)
+            {
+                if (kvp.Key.EndsWith(langSuffix, StringComparison.Ordinal))
+                    candidates.Add(kvp.Key);
+            }
+            if (candidates.Count == 1)
+            {
+                _langPairToDocKey[langKey] = candidates[0];
+                LoggingHelper.Verbose($"View document ID resolved by language pair scan. RequestedKey={key}, ResolvedKey={candidates[0]}");
+                return candidates[0];
+            }
+            if (candidates.Count > 1)
+            {
+                LoggingHelper.Warn($"Multiple documents match language pair {srcLang}|{tgtLang}, cannot auto-resolve View key. Keys={string.Join(", ", candidates)}");
+            }
+
+            return key;
         }
 
         #region memoQ 回调
