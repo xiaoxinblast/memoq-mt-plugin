@@ -14,11 +14,34 @@
 
 ## 本 Fork 改动
 
-在原始项目基础上，本分支进行了以下改进：
+基于上游 [v1.4.1](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin) 对照源代码，本分支做了以下改动：
 
-- **修复**：View 视图场景下上下文发送失效问题
-- **改进**：上下文标签加入序号（`[上文1 原文]` `[上文1 译文]` 等），更清晰地区分多个上下文来源
-- **重构**：改进日志排版可读性
+### 日志系统重构（[LoggingHelper.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Helpers/LoggingHelper.cs)）
+
+- 引入请求上下文 ID（`#001`、`#002` …），每次翻译请求关联所有日志行，定位问题更高效
+- 新增 `Separator()` 分隔线和 `Multiline()` 结构化多行输出，Prompt/Response 不再混在单行 `\r\n` 里
+- 日志格式改为 `HH:mm:ss.fff [TAG] [#ID] message`，比原版 `yyyy-MM-dd HH:mm:ss.fff [LEVEL] - message` 更紧凑
+
+### 上下文标签加入序号（[ContextHelper.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Helpers/ContextHelper.cs)）
+
+- 上下文句段加入 `[上文1 原文]` `[上文1 译文]` `[下文2 原文]` 等序号标签，LLM 更易区分多个上下文来源的对应关系
+
+### memoQ 标签智能处理（[MultiSupplierMTSession.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/MultiSupplierMTSession.cs)）
+
+- 新增源标签映射构建（`BuildSourceTagMap`），将 memoQ 内联标签的 `displaytext`/`val` 含义传给 LLM，避免标签语义丢失
+- 新增译文标签归一化（`NormalizeDisplayedTagsToSourceTokens`），后处理时自动将显示文本还原为标准标签令牌
+- 缓存键加入标签映射，避免不同标签结构的句段命中错误缓存
+
+### LLM 思考模式支持
+
+- **Anthropic**（[Service.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Providers/Anthropic/Service.cs)）：新增 Claude 4.x 系列 thinking/enabled/disabled/budget 配置，支持 `claude-opus-4-7`、`claude-sonnet-4-6` 等新模型，响应内容改为拼接所有 text block
+- **OpenAI 及兼容提供商**（[Service.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Providers/OpenAI/Service.cs)）：新增多提供商 thinking 分派 —— OpenAI reasoning_effort、DeepSeek thinking、Google reasoning_effort、阿里云 enable_thinking，自动根据 base URL 和模型名选择合适的 API 参数
+
+### 其他改进
+
+- **语言代码表**：LLM 提供商的语言映射从 `LanguageHelper.CodeToFriendlyNameDic` 切换为 `LLMSupportLang.Dic`
+- **异常处理**：LLM 非正常 `finish_reason`（如 `length`、`content_filter`）现在抛出异常而非仅记录日志，避免空译文进入缓存
+- **日志覆盖**：关键路径（缓存命中/未命中、批次拆分、并发等待、请求分发等）补充了 Verbose 级别日志
 
 ## 项目概述
 
