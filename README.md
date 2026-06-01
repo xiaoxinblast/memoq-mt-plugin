@@ -12,36 +12,28 @@
 | **许可证** | [MIT License](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/LICENSE) |
 | **Star** | ⭐ 22+ |
 
-## 本 Fork 改动
+## 相比上游的改进（v1.5.0）
 
-基于上游 [v1.4.1](https://github.com/JuchiaLu/Multi-Supplier-MT-Plugin) 对照源代码，本分支做了以下改动：
+### 更好的翻译质量
 
-### 日志系统重构（[LoggingHelper.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Helpers/LoggingHelper.cs)）
+**memoQ 标签不再丢失含义**
+带格式标记翻译时，原文中的标签（如加粗、斜体、引用、索引等）不再是空洞的 `<inline_tag id="5"/>`，插件现在会把标签的真实含义（如 `[Bold]`、`[Index: 关键词]`）传给大模型，译文标签放对位置的概率大幅提升。
 
-- 引入请求上下文 ID（`#001`、`#002` …），每次翻译请求关联所有日志行，定位问题更高效
-- 新增 `Separator()` 分隔线和 `Multiline()` 结构化多行输出，Prompt/Response 不再混在单行 `\r\n` 里
-- 日志格式改为 `HH:mm:ss.fff [TAG] [#ID] message`，比原版 `yyyy-MM-dd HH:mm:ss.fff [LEVEL] - message` 更紧凑
+**LLM 思考模式**
+支持 Claude、GPT-5、DeepSeek、Gemini 等模型的思考/推理模式。翻译复杂长句或专业文本时，可以让模型先"想清楚"再动笔。在服务商设置中即可开关和调节思考强度，插件会自动适配不同提供商的 API 参数。
 
-### 上下文标签加入序号（[ContextHelper.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Helpers/ContextHelper.cs)）
+**译文不丢内容**
+原版遇到模型输出被截断（finish_reason = length）时只是记一条日志，空译文可能被当作正确结果缓存下来。现在会正确报错并触发重试。
 
-- 上下文句段加入 `[上文1 原文]` `[上文1 译文]` `[下文2 原文]` 等序号标签，LLM 更易区分多个上下文来源的对应关系
+### 更好的上下文
 
-### memoQ 标签智能处理（[MultiSupplierMTSession.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/MultiSupplierMTSession.cs)）
+- 发送给大模型的上下文句段现在带有 `[上文1 原文]` `[下文2 译文]` 等标签，模型能清楚地知道每句话的位置和角色，翻译连贯性更好。
 
-- 新增源标签映射构建（`BuildSourceTagMap`），将 memoQ 内联标签的 `displaytext`/`val` 含义传给 LLM，避免标签语义丢失
-- 新增译文标签归一化（`NormalizeDisplayedTagsToSourceTokens`），后处理时自动将显示文本还原为标准标签令牌
-- 缓存键加入标签映射，避免不同标签结构的句段命中错误缓存
+### 更容易排查问题
 
-### LLM 思考模式支持
-
-- **Anthropic**（[Service.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Providers/Anthropic/Service.cs)）：新增 Claude 4.x 系列 thinking/enabled/disabled/budget 配置，支持 `claude-opus-4-7`、`claude-sonnet-4-6` 等新模型，响应内容改为拼接所有 text block
-- **OpenAI 及兼容提供商**（[Service.cs](source/workspace/Multi-Supplier-MT-Plugin-1.4.1/MultiSupplierMTPlugin/Providers/OpenAI/Service.cs)）：新增多提供商 thinking 分派 —— OpenAI reasoning_effort、DeepSeek thinking、Google reasoning_effort、阿里云 enable_thinking，自动根据 base URL 和模型名选择合适的 API 参数
-
-### 其他改进
-
-- **语言代码表**：LLM 提供商的语言映射从 `LanguageHelper.CodeToFriendlyNameDic` 切换为 `LLMSupportLang.Dic`
-- **异常处理**：LLM 非正常 `finish_reason`（如 `length`、`content_filter`）现在抛出异常而非仅记录日志，避免空译文进入缓存
-- **日志覆盖**：关键路径（缓存命中/未命中、批次拆分、并发等待、请求分发等）补充了 Verbose 级别日志
+- 每次翻译请求有独立编号，日志一目了然。
+- API 请求和响应的 Prompt/Response 不再挤成一团，分行展示、用分隔线隔开，复制出来就能直接看。
+- 缓存命中、批次拆分、并发排队、请求失败等关键环节都有日志记录，出问题时不用再猜。
 
 ## 项目概述
 
