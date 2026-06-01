@@ -26,3 +26,5 @@ release/
 Thumbs.db
 Desktop.ini
 [Dd]esktop.ini
+.claude/
+CLAUDE.md
