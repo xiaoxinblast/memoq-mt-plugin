@@ -267,21 +267,24 @@ namespace MultiSupplierMTPlugin.Helpers
                 charCount += includeTgt ? content.Target.Length : 0;
                 if (maxChar > 0 && charCount > maxChar) break;
 
+                segmCount++;
+                var srcLabel = isAbove ? $"[上文{segmCount} 原文]" : $"[下文{segmCount} 原文]";
+                var tgtLabel = isAbove ? $"[上文{segmCount} 译文]" : $"[下文{segmCount} 译文]";
+
                 var normalizedTarget = includeTgt && targetNormalizer != null
                     ? targetNormalizer(content.Source, content.Target)
                     : content.Target;
 
                 if (isAbove)
                 {
-                    if (includeTgt) results.Insert(0, normalizedTarget);
-                    if (includeSrc) results.Insert(0, content.Source);
+                    if (includeTgt) results.Insert(0, tgtLabel + " " + normalizedTarget);
+                    if (includeSrc) results.Insert(0, srcLabel + " " + content.Source);
                 }
                 else
                 {
-                    if (includeSrc) results.Add(content.Source);
-                    if (includeTgt) results.Add(normalizedTarget);
+                    if (includeSrc) results.Add(srcLabel + " " + content.Source);
+                    if (includeTgt) results.Add(tgtLabel + " " + normalizedTarget);
                 }
-                segmCount++;
 
                 current += direction;
             }
